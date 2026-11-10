@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ForgeBooks, Invoice Automation Dashboard (Demo)</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<!-- ============ LOGIN SCREEN ============ -->
+<section id="loginScreen" class="login-screen">
+  <div class="login-card">
+    <div class="login-brand">
+      <span class="logo-mark">F</span>
+      <div>
+        <h1>ForgeBooks</h1>
+        <p class="login-subtitle">Invoice Automation Dashboard</p>
+        <p class="login-workspace">Demo workspace: Malwa Trading Co., Dewas, Madhya Pradesh</p>
+      </div>
+    </div>
+
+    <p class="login-intro">Track invoices, spot overdue bills, and get a plain-language summary of every invoice. All in one place.</p>
+
+    <form id="loginForm" novalidate>
+      <label for="loginEmail">Email</label>
+      <input type="email" id="loginEmail" placeholder="demo@forgebooks.demo" autocomplete="username">
+
+      <label for="loginPassword">Password</label>
+      <input type="password" id="loginPassword" placeholder="demo123" autocomplete="current-password">
+
+      <p id="loginError" class="error-text" role="alert" hidden>Those credentials do not match the demo account. Check the demo credentials below and try again.</p>
+
+      <button type="submit" class="btn btn-primary btn-block">Sign in</button>
+    </form>
+
+    <button id="demoLoginBtn" class="btn btn-ghost btn-block" type="button">Continue as demo user</button>
+
+    <div class="demo-creds">
+      <p><strong>Demo credentials</strong></p>
+      <p>Email: <code>demo@forgebooks.demo</code></p>
+      <p>Password: <code>demo123</code></p>
+      <p class="muted">No real account is needed. Nothing you type leaves your browser.</p>
+    </div>
+
+    <p class="demo-note">Demo / Concept project by Vedansh Vyas. Sample data only, nothing is real.</p>
+  </div>
+</section>
+
+<!-- ============ APP SCREEN ============ -->
+<section id="appScreen" class="app-screen" hidden>
+  <header class="topbar">
+    <div class="brand">
+      <span class="logo-mark">F</span>
+      <div>
+        <strong>ForgeBooks</strong>
+        <span class="brand-sub">Invoice Automation, Malwa Trading Co., Dewas</span>
+      </div>
+    </div>
+    <div class="topbar-right">
+      <span class="user-chip">Signed in as <strong>Demo User</strong></span>
+      <button id="logoutBtn" class="btn btn-ghost btn-small" type="button">Log out</button>
+    </div>
+  </header>
+
+  <main class="container">
+    <div class="page-head">
+      <h2>Dashboard</h2>
+      <p class="muted">All figures are sample data for demonstration.</p>
+    </div>
+
+    <!-- KPI CARDS -->
+    <div class="kpi-grid" id="kpiGrid">
+      <div class="kpi-card">
+        <p class="kpi-label">Invoiced this month (Nov 2026)</p>
+        <p class="kpi-value" id="kpiTotal">₹0</p>
+        <p class="kpi-sub" id="kpiTotalCount">0 invoices</p>
+      </div>
+      <div class="kpi-card kpi-paid">
+        <p class="kpi-label">Paid (Nov 2026)</p>
+        <p class="kpi-value" id="kpiPaid">₹0</p>
+        <p class="kpi-sub" id="kpiPaidCount">0 invoices</p>
+      </div>
+      <div class="kpi-card kpi-pending">
+        <p class="kpi-label">Pending (all)</p>
+        <p class="kpi-value" id="kpiPending">₹0</p>
+        <p class="kpi-sub" id="kpiPendingCount">0 invoices</p>
+      </div>
+      <div class="kpi-card kpi-overdue">
+        <p class="kpi-label">Overdue (all)</p>
+        <p class="kpi-value" id="kpiOverdue">₹0</p>
+        <p class="kpi-sub" id="kpiOverdueCount">0 invoices</p>
+      </div>
+    </div>
+
+    <!-- MONTHLY CHART -->
+    <div class="card chart-card">
+      <div class="card-head">
+        <h3>Monthly invoiced totals</h3>
+        <span class="muted">Jun 2026 to Nov 2026</span>
+      </div>
+      <div class="bar-chart" id="barChart" aria-label="Bar chart of monthly invoiced totals"></div>
+      <p class="muted chart-note">Totals update automatically when you add or delete an invoice.</p>
+    </div>
+
+    <!-- INVOICES -->
+    <div class="card">
+      <div class="card-head wrap">
+        <h3>Invoices <span class="muted" id="invoiceCount"></span></h3>
+        <div class="toolbar-actions">
+          <button id="exportBtn" class="btn btn-ghost btn-small" type="button">Export CSV</button>
+          <button id="addBtn" class="btn btn-primary btn-small" type="button">+ Add invoice</button>
+        </div>
+      </div>
+
+      <div class="toolbar">
+        <input type="search" id="searchInput" placeholder="Search vendor or invoice number" aria-label="Search vendor or invoice number">
+        <select id="statusFilter" aria-label="Filter by status">
+          <option value="all">All statuses</option>
+          <option value="Paid">Paid</option>
+          <option value="Pending">Pending</option>
+          <option value="Overdue">Overdue</option>
+          <option value="Draft">Draft</option>
+        </select>
+        <select id="sortSelect" aria-label="Sort invoices">
+          <option value="date-desc">Date: newest first</option>
+          <option value="date-asc">Date: oldest first</option>
+          <option value="amount-desc">Amount: high to low</option>
+          <option value="amount-asc">Amount: low to high</option>
+        </select>
+      </div>
+
+      <div class="table-wrap">
+        <table id="invoiceTable">
+          <thead>
+            <tr>
+              <th>Invoice No.</th>
+              <th>Vendor</th>
+              <th>Date</th>
+              <th>Category</th>
+              <th class="num">Amount</th>
+              <th>Status</th>
+              <th><span class="sr-only">Actions</span></th>
+            </tr>
+          </thead>
+          <tbody id="invoiceTableBody"></tbody>
+        </table>
+        <p id="emptyState" class="empty-state" hidden>No invoices match your search or filter. Try clearing them.</p>
+      </div>
+    </div>
+
+    <p class="reset-line"><button id="resetBtn" class="link-btn" type="button">Reset sample data</button></p>
+  </main>
+
+  <footer class="app-footer">
+    <p>Demo / Concept project by Vedansh Vyas. Sample data only, nothing is real.</p>
+    <p class="muted">Data is stored only in your browser (localStorage). No information is sent anywhere.</p>
+  </footer>
+</section>
+
+<!-- ============ INVOICE DETAIL MODAL ============ -->
+<div id="detailModal" class="modal" hidden>
+  <div class="modal-backdrop" data-close="detailModal"></div>
+  <div class="modal-box" role="dialog" aria-modal="true" aria-labelledby="detailTitle">
+    <div class="modal-head">
+      <h3 id="detailTitle">Invoice detail</h3>
+      <button class="modal-close" type="button" data-close="detailModal" aria-label="Close">&times;</button>
+    </div>
+    <div id="detailBody"></div>
+  </div>
+</div>
+
+<!-- ============ ADD INVOICE MODAL ============ -->
+<div id="addModal" class="modal" hidden>
+  <div class="modal-backdrop" data-close="addModal"></div>
+  <div class="modal-box" role="dialog" aria-modal="true" aria-labelledby="addTitle">
+    <div class="modal-head">
+      <h3 id="addTitle">Add invoice</h3>
+      <button class="modal-close" type="button" data-close="addModal" aria-label="Close">&times;</button>
+    </div>
+    <form id="addForm" novalidate>
+      <label for="fVendor">Vendor</label>
+      <input type="text" id="fVendor" placeholder="e.g. Sharma Stationery Co.">
+
+      <label for="fInvoiceNo">Invoice number</label>
+      <input type="text" id="fInvoiceNo" placeholder="e.g. INV-2026-0120">
+
+      <div class="form-row">
+        <div>
+          <label for="fDate">Date</label>
+          <input type="date" id="fDate">
+        </div>
+        <div>
+          <label for="fAmount">Amount (INR)</label>
+          <input type="number" id="fAmount" min="1" step="1" placeholder="e.g. 12500">
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div>
+          <label for="fCategory">Category</label>
+          <select id="fCategory">
+            <option>Office Supplies</option>
+            <option>Software</option>
+            <option>Cloud Hosting</option>
+            <option>Travel</option>
+            <option>Utilities</option>
+            <option>Marketing</option>
+            <option>Consulting</option>
+            <option>Hardware</option>
+            <option>General</option>
+          </select>
+        </div>
+        <div>
+          <label for="fStatus">Status</label>
+          <select id="fStatus">
+            <option>Pending</option>
+            <option>Paid</option>
+            <option>Overdue</option>
+            <option>Draft</option>
+          </select>
+        </div>
+      </div>
+
+      <p id="addError" class="error-text" role="alert" hidden></p>
+
+      <div class="modal-actions">
+        <button type="button" class="btn btn-ghost" data-close="addModal">Cancel</button>
+        <button type="submit" class="btn btn-primary">Save invoice</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div id="toast" class="toast" role="status" hidden></div>
+
+<script src="app.js"></script>
+</body>
+</html>
